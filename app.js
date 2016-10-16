@@ -13,7 +13,7 @@ app.get ('/', function (req, res) {
 	res.writeHead(403, {'Content-Type': 'text/html'});
 	res.end(require('fs').readFileSync(__dirname + "/help.html", 'utf8'));
 });
-app.post('/api/getSchedule', function (req, res) {
+app.post('/api/time-table', function (req, res) {
 	var name = req.body.name;
 	var pass = req.body.pass;
 	getFormBuildId(name, pass, res, loginDaa);
