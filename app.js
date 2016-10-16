@@ -16,6 +16,7 @@ app.get ('/', function (req, res) {
 app.post('/api/time-table', function (req, res) {
 	var name = req.body.name;
 	var pass = req.body.pass;
+	console.log(JSON.stringify(req.body));
 	getFormBuildId(name, pass, res, loginDaa);
 });
 app.listen(port);
