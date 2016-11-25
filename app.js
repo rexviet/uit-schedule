@@ -4,9 +4,15 @@ var bodyParser = require('body-parser');
 var express = require('express');
 var Subject = require('./subject');
 
+var fs = require("fs");
+var html = fs.readFileSync(__dirname + "/tuan.html", "utf8");
+
 var app = express();
 var port = Number(process.env.PORT || 3000);
 app.use(bodyParser.json());
+
+const TIET_1 = 0, TIET_4 = 3, TIET_6 = 5, TIET_9 = 8;
+const MON = 1, TUE = 2, WED = 3, THU = 4, FRI = 5, SAT = 6;
 
 // main region
 app.get ('/', function (req, res) {
@@ -19,7 +25,32 @@ app.post('/api/time-table', function (req, res) {
 	console.log(JSON.stringify(req.body));
 	getFormBuildId(name, pass, res, loginDaa);
 });
-app.listen(port);
+app.listen(port, function () {
+//	console.log(html);
+	var $ = cheerio.load(html);
+//	console.log($('div#block-system-main').find('div.title_thongtindangky > p').text());
+
+	var schedule = {
+		monday: [],
+		tuesday: [],
+		wednesday: [],
+		thursday: [],
+		friday: [],
+		saturday: []
+	}
+	var table = $('tbody').children();
+
+	// tiet 1
+	crawlSchedule ($, table, schedule, TIET_1);
+	// tiet 4
+	crawlSchedule ($, table, schedule, TIET_4);
+	// tiet 6
+	crawlSchedule ($, table, schedule, TIET_6);
+	// tiet 9
+	crawlSchedule ($, table, schedule, TIET_9);
+
+	console.log(JSON.stringify(schedule));
+});
 // end main region
 
 
@@ -54,7 +85,7 @@ function loginDaa (name, pass, formBuildId, res, callback) {
 	request.post(myReq, function (err, response, body) {
 		if (!err) {
 			var $ = cheerio.load(body);
-			
+
 
 			if ($('div#block-user-login').length) {
 				console.log('Login fail');
@@ -68,7 +99,7 @@ function loginDaa (name, pass, formBuildId, res, callback) {
 					callback(cookie, res);
 			}
 		}
-	});	
+	});
 }
 
 function getSchedule (cookie, res) {
@@ -98,18 +129,18 @@ function getSchedule (cookie, res) {
 				var table = $('tbody').children();
 
 				// tiet 1
-				crawlSchedule ($, table, schedule, 0);
+				crawlSchedule ($, table, schedule, TIET_1);
 				// tiet 4
-				crawlSchedule ($, table, schedule, 3);
+				crawlSchedule ($, table, schedule, TIET_4);
 				// tiet 6
-				crawlSchedule ($, table, schedule, 5);
+				crawlSchedule ($, table, schedule, TIET_6);
 				// tiet 9
-				crawlSchedule ($, table, schedule, 8);
-									
+				crawlSchedule ($, table, schedule, TIET_9);
+
 
 				res.writeHead(200, { 'Content-Type': 'text/json' });
 				res.end(JSON.stringify(schedule));
-			} else 
+			} else
 				console.log(err);
 	  });
 }
@@ -121,41 +152,45 @@ function deHTML (html) {
 
 function pushSubjectToSchedule (schedule, pos, subject) {
 	switch (pos) {
-		case 1:
+		case MON:
 			schedule.monday.push(subject);
 			break;
-		case 2:
+		case TUE:
 			schedule.tuesday.push(subject);
 			break;
-		case 3:
+		case WED:
 			schedule.wednesday.push(subject);
 			break;
-		case 4:
+		case THU:
 			schedule.thursday.push(subject);
 			break;
-		case 5:
+		case FRI:
 			schedule.friday.push(subject);
 			break;
-		case 6:
+		case SAT:
 			schedule.saturday.push(subject);
 			break;
 	}
 }
 
 function crawlSchedule ($, table, schedule, lesson) {
-	for (var i=1; i<=6; i++) {
+	for (var i=MON; i<=SAT; i++) {
 		var content = $(table).eq(lesson).children().eq(i);
 		if (content.children().length) {
 			var sub = new Subject();
 
 			for (var j=0; j<6; j++) {
 				var html = $(content).html().split('<br>')[j];
-				sub.setData(j, deHTML(html));	
+				sub.setData(j, deHTML(html));
 			}
 			sub.setData(6, lesson+1);
 			sub.setData(7, parseInt($(content).attr('rowspan')));
-			pushSubjectToSchedule(schedule, i, sub);
+
+			if(lesson === TIET_4)
+				pushSubjectToSchedule(schedule, i+1, sub);
+			else
+				pushSubjectToSchedule(schedule, i, sub);
 		}
-	}		
+	}
 }
 // end function region
