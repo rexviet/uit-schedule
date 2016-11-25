@@ -4,8 +4,8 @@ var bodyParser = require('body-parser');
 var express = require('express');
 var Subject = require('./subject');
 
-var fs = require("fs");
-var html = fs.readFileSync(__dirname + "/tuan.html", "utf8");
+//var fs = require("fs");
+//var html = fs.readFileSync(__dirname + "/tuan.html", "utf8");
 
 var app = express();
 var port = Number(process.env.PORT || 3000);
@@ -25,7 +25,9 @@ app.post('/api/time-table', function (req, res) {
 	console.log(JSON.stringify(req.body));
 	getFormBuildId(name, pass, res, loginDaa);
 });
-app.listen(port);
+app.listen(port, function () {
+	console.log('started');
+});
 // end main region
 
 
