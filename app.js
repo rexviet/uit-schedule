@@ -25,32 +25,7 @@ app.post('/api/time-table', function (req, res) {
 	console.log(JSON.stringify(req.body));
 	getFormBuildId(name, pass, res, loginDaa);
 });
-app.listen(port, function () {
-//	console.log(html);
-	var $ = cheerio.load(html);
-//	console.log($('div#block-system-main').find('div.title_thongtindangky > p').text());
-
-	var schedule = {
-		monday: [],
-		tuesday: [],
-		wednesday: [],
-		thursday: [],
-		friday: [],
-		saturday: []
-	}
-	var table = $('tbody').children();
-
-	// tiet 1
-	crawlSchedule ($, table, schedule, TIET_1);
-	// tiet 4
-	crawlSchedule ($, table, schedule, TIET_4);
-	// tiet 6
-	crawlSchedule ($, table, schedule, TIET_6);
-	// tiet 9
-	crawlSchedule ($, table, schedule, TIET_9);
-
-	console.log(JSON.stringify(schedule));
-});
+app.listen(port);
 // end main region
 
 
